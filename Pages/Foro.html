@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Foro | Serenity</title>
   <link rel="stylesheet" href="../CSS/Foro/Foro.css">
-  
 </head>
 <body>
   <header class="chat-header">
@@ -40,7 +39,9 @@
 
     <div class="chat-main">
       <div class="chat-messages" id="messages" aria-live="polite" aria-relevant="additions">
-        
+        <div style="text-align: center; padding: 20px; color: #888;">
+          Cargando mensajes...
+        </div>
       </div>
 
       <form id="composer" class="chat-input" autocomplete="off">
@@ -53,7 +54,9 @@
       <div class="registered-users">
         <h3>Usuarios Registrados — <span id="userCount">0</span></h3>
         <div id="usersList">
-       
+          <div style="text-align: center; padding: 20px; color: #888;">
+            Cargando usuarios...
+          </div>
         </div>
       </div>
     </aside>
@@ -61,34 +64,128 @@
 
   <script>
     (function(){
+      // Usar producción (Render)
+      const API_URL = 'https://serenity-backend-78rn.onrender.com';
+
+      console.log('🚀 Foro iniciado');
+      console.log('📡 API URL:', API_URL);
+
       const elMessages = document.getElementById('messages');
       const elComposer = document.getElementById('composer');
       const elMessage = document.getElementById('message');
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || 'null');
 
+      console.log('🔐 Token encontrado:', token ? 'Sí' : 'No');
+      console.log('👤 Usuario:', user);
+
+      // Verificar autenticación
+      if (!token) {
+        alert('Debes iniciar sesión para usar el foro');
+        window.location.href = 'login-register.html';
+        return;
+      }
+
+      // Probar conexión al iniciar
+      async function testConnection() {
+        try {
+          console.log('🔌 Probando conexión con el servidor...');
+          const response = await fetch(`${API_URL}/api/health`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Servidor conectado:', data);
+          } else {
+            console.warn('⚠️ Servidor respondió con error:', response.status);
+          }
+        } catch (error) {
+          console.error('❌ No se pudo conectar al servidor:', error);
+          console.error('💡 El servidor puede estar apagándose (Render free tier)');
+          alert('El servidor está iniciándose. Esto puede tomar 1-2 minutos en Render. Por favor espera y recarga la página.');
+        }
+      }
+
       function escapeHtml(s){
-        return (s || '').replace(/[&<>"]/g, c => ({'&':'&','<':'<','>':'>','"':'"'}[c]));
+        return (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       }
 
       async function loadPosts(){
         try {
-          const response = await fetch('https://serenity-backend-78rn.onrender.com/api/forum/posts');
+          console.log('📨 Cargando posts desde:', `${API_URL}/api/forum/posts`);
+          const response = await fetch(`${API_URL}/api/forum/posts`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          console.log('📨 Response status:', response.status);
+          console.log('📨 Response headers:', Object.fromEntries(response.headers.entries()));
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error loading posts:', errorText);
+            
+            // Si es error de servidor, puede estar iniciándose
+            if (response.status >= 500) {
+              throw new Error('El servidor está iniciándose. Por favor espera 1-2 minutos y recarga.');
+            }
+            
+            throw new Error(`Error ${response.status}: ${errorText}`);
+          }
+          
           const data = await response.json();
+          console.log('✅ Posts cargados:', data.posts?.length || 0);
+          console.log('📋 Posts:', data.posts);
           return data.posts || [];
         } catch (error) {
-          console.error('Error loading posts:', error);
+          console.error('❌ Error loading posts:', error);
+          elMessages.innerHTML = `<div style="text-align: center; padding: 20px; color: #f44336;">
+            Error al cargar mensajes: ${error.message}<br>
+            <small>Verifica la consola (F12) para más detalles</small>
+          </div>`;
           return [];
         }
       }
 
       async function loadUsers(){
         try {
-          const response = await fetch('https://serenity-backend-78rn.onrender.com/api/users');
+          console.log('👥 Cargando usuarios desde:', `${API_URL}/api/users`);
+          const response = await fetch(`${API_URL}/api/users`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          console.log('👥 Response status:', response.status);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error loading users:', errorText);
+            
+            if (response.status >= 500) {
+              throw new Error('El servidor está iniciándose. Por favor espera 1-2 minutos y recarga.');
+            }
+            
+            throw new Error(`Error ${response.status}: ${errorText}`);
+          }
+          
           const data = await response.json();
+          console.log('✅ Usuarios cargados:', data.users?.length || 0);
+          console.log('📋 Lista de usuarios:', data.users);
           return data.users || [];
         } catch (error) {
-          console.error('Error loading users:', error);
+          console.error('❌ Error loading users:', error);
+          const usersList = document.getElementById('usersList');
+          usersList.innerHTML = `<div style="text-align: center; padding: 10px; color: #f44336; font-size: 12px;">
+            Error: ${error.message}
+          </div>`;
           return [];
         }
       }
@@ -96,14 +193,23 @@
       function renderUsers(users){
         const usersList = document.getElementById('usersList');
         const userCount = document.getElementById('userCount');
+        
+        console.log('🎨 Renderizando', users.length, 'usuarios');
+        
         userCount.textContent = users.length;
         usersList.innerHTML = '';
+
+        if (users.length === 0) {
+          usersList.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">No hay usuarios registrados</div>';
+          return;
+        }
 
         users.forEach(user => {
           const userEl = document.createElement('div');
           userEl.className = 'user';
           userEl.style.cursor = 'pointer';
           userEl.onclick = () => {
+            console.log('👤 Navegando al perfil de:', user.username, '(ID:', user.id, ')');
             window.location.href = `Perfil/perfil-publico.html?id=${user.id}`;
           };
 
@@ -117,7 +223,15 @@
       }
 
       function render(posts){
+        console.log('🎨 Renderizando', posts.length, 'posts');
+        
         elMessages.innerHTML = '';
+        
+        if (posts.length === 0) {
+          elMessages.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">No hay mensajes aún. ¡Sé el primero en escribir!</div>';
+          return;
+        }
+
         posts.forEach((post, index) => {
           const msgEl = document.createElement('div');
           msgEl.className = 'message';
@@ -139,42 +253,109 @@
       }
 
       async function loadAndRender(){
-        const posts = await loadPosts();
+        console.log('🔄 Recargando todo...');
+        const [posts, users] = await Promise.all([
+          loadPosts(),
+          loadUsers()
+        ]);
         render(posts);
-
-        const users = await loadUsers();
         renderUsers(users);
       }
 
       elComposer.addEventListener('submit', async (e)=>{
         e.preventDefault();
         const text = elMessage.value.trim();
-        if (!text || !token) return;
+        
+        console.log('📤 Intentando enviar mensaje:', text);
+        
+        if (!text) {
+          console.warn('⚠️ Mensaje vacío');
+          return;
+        }
+        
+        if (!token) {
+          console.error('❌ No hay token');
+          alert('No estás autenticado. Por favor, inicia sesión.');
+          window.location.href = 'login-register.html';
+          return;
+        }
+
+        // Deshabilitar botón mientras se envía
+        const submitBtn = elComposer.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
 
         try {
-          const response = await fetch('https://serenity-backend-78rn.onrender.com/api/forum/posts', {
+          console.log('📤 Enviando POST a:', `${API_URL}/api/forum/posts`);
+          console.log('📤 Token:', token.substring(0, 20) + '...');
+          console.log('📤 Mensaje:', text);
+
+          const response = await fetch(`${API_URL}/api/forum/posts`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
             },
             body: JSON.stringify({ message: text })
           });
 
-          if (response.ok) {
-            elMessage.value = '';
-            loadAndRender();
-          } else {
-            alert('Error al enviar mensaje');
+          console.log('📤 Response status:', response.status);
+          console.log('📤 Response headers:', Object.fromEntries(response.headers.entries()));
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error response:', errorText);
+            
+            if (response.status === 401 || response.status === 403) {
+              alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = 'login-register.html';
+              return;
+            }
+            
+            if (response.status >= 500) {
+              throw new Error('Error del servidor. Por favor intenta nuevamente en unos momentos.');
+            }
+            
+            let errorMessage;
+            try {
+              const errorData = JSON.parse(errorText);
+              errorMessage = errorData.detail || errorText;
+            } catch {
+              errorMessage = errorText;
+            }
+            
+            throw new Error(`Error ${response.status}: ${errorMessage}`);
           }
+
+          const result = await response.json();
+          console.log('✅ Mensaje enviado:', result);
+          
+          elMessage.value = '';
+          await loadAndRender();
+          
         } catch (error) {
-          console.error('Error posting:', error);
-          alert('Error de conexión');
+          console.error('❌ Error posting:', error);
+          alert('Error al enviar mensaje: ' + error.message + '\n\nRevisa la consola (F12) para más detalles.');
+        } finally {
+          // Rehabilitar botón
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
         }
       });
 
-      
+      // Probar conexión primero
+      testConnection();
+
+      // Cargar datos iniciales
       loadAndRender();
+
+      // Auto-refresh cada 10 segundos (para no saturar el servidor de Render)
+      setInterval(loadAndRender, 10000);
+      console.log('⏱️ Auto-refresh activado (cada 10 segundos)');
     })();
   </script>
 </body>

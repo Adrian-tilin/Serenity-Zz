@@ -1,158 +1,143 @@
-// Level 6 Question Pool - Juego Psicológico
-const level6Pool = [
+// Level 5 Question Pool - Juego Psicológico
+const level5Pool = [
     // 🔹 Fácil (5 preguntas)
     {
-        question: "¿Qué significa resiliencia en psicología?",
+        question: "¿Qué es un “trastorno psicológico”?",
         options: [
-            "Reprimir los problemas",
-            "No sentir emociones",
-            "La capacidad de adaptarse y superar dificultades",
-            "Olvidar lo malo"
-        ],
-        correct: 2
-    },
-    {
-        question: "¿Qué estudia la neuropsicología?",
-        options: [
-            "La relación entre cerebro y conducta",
-            "Los sueños",
-            "El inconsciente",
-            "Los instintos"
-        ],
-        correct: 0
-    },
-    {
-        question: "¿Qué es la ansiedad?",
-        options: [
-            "Una emoción normal que puede volverse excesiva y afectar la vida diaria",
-            "Una simple costumbre",
-            "Un rasgo de carácter",
-            "Una alergia"
-        ],
-        correct: 0
-    },
-    {
-        question: "¿Qué parte del cerebro regula las funciones vitales básicas (respirar, latir, digerir)?",
-        options: [
-            "Hipocampo",
-            "Tronco encefálico",
-            "Cerebelo",
-            "Corteza prefrontal"
+            "Una emoción fuerte",
+            "Una dificultad que afecta pensamientos, emociones o conductas",
+            "Un mal hábito",
+            "Una simple tristeza"
         ],
         correct: 1
     },
     {
-        question: "¿Qué significa el término “plasticidad cerebral”?",
+        question: "¿Qué psicólogo propuso la teoría del aprendizaje social?",
+        options: ["Pavlov", "Skinner", "Bandura", "Erikson"],
+        correct: 2
+    },
+    {
+        question: "¿Qué significa el término “cognición”?",
         options: [
-            "Que el cerebro cambia y se adapta a nuevas experiencias",
-            "Que el cerebro crece con la edad",
-            "Que el cerebro es rígido",
-            "Que las neuronas nunca mueren"
+            "Los movimientos del cuerpo",
+            "Los procesos mentales como pensar, razonar y recordar",
+            "Las emociones básicas",
+            "El instinto"
         ],
-        correct: 0
+        correct: 1
+    },
+    {
+        question: "¿Qué es la motivación?",
+        options: [
+            "Una emoción pasajera",
+            "La energía que impulsa a actuar hacia un objetivo",
+            "Un recuerdo",
+            "Un instinto biológico"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué parte del cerebro está relacionada con el lenguaje (habla)?",
+        options: ["Hipocampo", "Amígdala", "Área de Broca", "Cerebelo"],
+        correct: 2
     },
 
     // 🔹 Medio (5 preguntas)
     {
-        question: "¿Qué mostró el experimento de Loftus sobre la memoria?",
+        question: "¿Qué plantea la teoría de la autodeterminación de Deci y Ryan?",
         options: [
-            "Que la memoria solo se basa en emociones",
-            "Que la memoria nunca falla",
-            "Que los recuerdos pueden modificarse con información falsa",
-            "Que la memoria es genética"
+            "Que las personas aprenden observando",
+            "Que la motivación depende de la autonomía, la competencia y la relación con otros",
+            "Que solo la genética determina la conducta",
+            "Que las emociones guían todo el aprendizaje"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué descubrió el experimento de Zimbardo (prisión de Stanford)?",
+        options: [
+            "Que los sueños influyen en la conducta",
+            "Que los roles sociales pueden cambiar drásticamente el comportamiento",
+            "Que la memoria se distorsiona fácilmente",
+            "Que los niños aprenden con juegos"
+        ],
+        correct: 1
+    },
+    {
+        question: "¿Qué significa “memoria procedimental”?",
+        options: [
+            "Recuerdos de hechos personales",
+            "Emociones aprendidas",
+            "Habilidades y destrezas como andar en bicicleta",
+            "Recuerdos de la infancia"
         ],
         correct: 2
     },
     {
-        question: "¿Qué es la “atención selectiva”?",
+        question: "¿Qué es la psicología positiva?",
         options: [
-            "Enfocarse en un estímulo y filtrar lo demás",
-            "Recordar todos los detalles al mismo tiempo",
-            "Escuchar varias conversaciones al mismo tiempo",
-            "Recordar solo lo que conviene"
+            "El estudio del inconsciente",
+            "El enfoque en las fortalezas, el bienestar y la felicidad",
+            "Una técnica de castigo",
+            "Estudiar solo enfermedades"
         ],
-        correct: 0
+        correct: 1
     },
     {
-        question: "Según Piaget, ¿qué caracteriza al pensamiento de un adolescente?",
+        question: "¿Qué significa el término “neurona espejo”?",
         options: [
-            "El juego simbólico",
-            "La memorización mecánica",
-            "El uso de reflejos automáticos",
-            "El pensamiento abstracto y la capacidad de formular hipótesis"
+            "Una célula que refleja la luz",
+            "Una neurona que se activa al observar la acción de otra persona",
+            "Una célula que guarda recuerdos",
+            "Una parte del oído"
         ],
-        correct: 3
-    },
-    {
-        question: "¿Qué significa el término “aprendizaje autorregulado”?",
-        options: [
-            "Que el estudiante organiza, controla y evalúa su propio aprendizaje",
-            "Que el aprendizaje depende solo de la memoria",
-            "Que el estudiante espera a que otros lo guíen",
-            "Que el aprendizaje es genético"
-        ],
-        correct: 0
-    },
-    {
-        question: "¿Qué descubrió el experimento de Asch sobre conformidad social?",
-        options: [
-            "Que las personas suelen seguir al grupo aunque sepan que está equivocado",
-            "Que todos tenemos la misma opinión",
-            "Que la obediencia depende de premios",
-            "Que los adolescentes no son influenciables"
-        ],
-        correct: 0
+        correct: 1
     },
 
     // 🔹 Difícil (5 preguntas)
     {
-        question: "Según Freud, ¿qué sucede cuando una emoción reprimida no se libera?",
+        question: "Según Freud, el “yo” (ego) actúa como:",
         options: [
-            "Desaparece sin problema",
-            "Se convierte en inteligencia",
-            "Puede transformarse en un síntoma psicológico",
-            "Se olvida para siempre"
-        ],
-        correct: 2
-    },
-    {
-        question: "¿Qué propone la teoría bioecológica de Bronfenbrenner?",
-        options: [
-            "Que solo la familia educa al niño",
-            "Que el desarrollo humano está influido por distintos sistemas sociales y contextos",
-            "Que el desarrollo depende solo de la genética",
-            "Que la cultura no influye"
+            "La parte moral",
+            "El mediador entre el ello y el superyó",
+            "El instinto básico",
+            "La conciencia absoluta"
         ],
         correct: 1
     },
     {
-        question: "¿Qué área cerebral se activa más en situaciones de miedo intenso?",
+        question: "¿Qué propone la teoría sociocognitiva de Bandura?",
         options: [
-            "Cerebelo",
-            "Área de Broca",
-            "Amígdala",
-            "Hipocampo"
-        ],
-        correct: 2
-    },
-    {
-        question: "¿Qué es el “efecto placebo” en psicología?",
-        options: [
-            "Curarse con medicamentos reales",
-            "Mejorar por la creencia de que un tratamiento funciona, aunque sea falso",
-            "Olvidar síntomas por distracción",
-            "No responder a un tratamiento"
+            "Que la conducta depende solo de la biología",
+            "Que aprendemos observando, imitando y con la influencia del ambiente",
+            "Que aprendemos solo con refuerzos",
+            "Que la mente es una 'caja negra'"
         ],
         correct: 1
     },
     {
-        question: "¿Qué significa la teoría del “aprendizaje constructivista”?",
+        question: "¿Qué parte del cerebro se activa más en la toma de decisiones racionales?",
+        options: ["Corteza prefrontal", "Amígdala", "Cerebelo", "Hipotálamo"],
+        correct: 0
+    },
+    {
+        question: "¿Qué es la “disonancia cognitiva” según Festinger?",
         options: [
-            "Que aprender depende solo de los exámenes",
-            "Que el conocimiento se construye activamente a partir de la experiencia",
-            "Que aprender es repetir sin reflexionar",
-            "Que aprender es copiar información"
+            "El malestar por tener pensamientos o conductas contradictorias",
+            "La represión de recuerdos",
+            "La memoria a corto plazo",
+            "El olvido voluntario"
         ],
-        correct: 1
+        correct: 0
+    },
+    {
+        question: "¿Qué significa el concepto de “aprendizaje experiencial” de Kolb?",
+        options: [
+            "Aprender solo con exámenes",
+            "Aprender memorizando",
+            "Aprender repitiendo",
+            "Aprender a través de la experiencia práctica y la reflexión"
+        ],
+        correct: 3
     }
 ];

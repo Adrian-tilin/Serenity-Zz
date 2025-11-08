@@ -62,7 +62,7 @@ const level1Pool = [
     },
     {
         question: "¿¿Qué estudia la psicología cognitiva?",
-        options: ["Los animales", "Los procesos mentales", "Las plantas", "Los colores"],
+        options: ["Los animales", "N Los procesos mentales", "Las plantas", "Los colores"],
         correct: 1
     },
     {
