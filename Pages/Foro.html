@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Foro | Serenity</title>
   <link rel="stylesheet" href="../CSS/Foro/Foro.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header class="chat-header">
@@ -64,50 +65,28 @@
 
   <script>
     (function(){
-      // Usar producción (Render)
-      const API_URL = 'https://serenity-backend-78rn.onrender.com';
-
-      console.log('🚀 Foro iniciado');
-      console.log('📡 API URL:', API_URL);
-
+      // Configuración de Supabase
+      const SUPABASE_URL = 'https://aizxgbigmmwlrrhlhusn.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpenhnYmlnbW13bHJyaGxodXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MDIxNTEsImV4cCI6MjA3ODE3ODE1MX0.mkdIM7hRMBZ5rEYw6_0dSDM9dmT_IEOhTuUBKjJMm7Y';
+      
+      // Inicializar Supabase
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      console.log('🚀 Foro iniciado con Supabase');
+      
       const elMessages = document.getElementById('messages');
       const elComposer = document.getElementById('composer');
       const elMessage = document.getElementById('message');
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-      console.log('🔐 Token encontrado:', token ? 'Sí' : 'No');
-      console.log('👤 Usuario:', user);
+      console.log('👤 Usuario actual:', user);
 
       // Verificar autenticación
-      if (!token) {
+      if (!user || !user.id) {
         alert('Debes iniciar sesión para usar el foro');
         window.location.href = 'login-register.html';
         return;
-      }
-
-      // Probar conexión al iniciar
-      async function testConnection() {
-        try {
-          console.log('🔌 Probando conexión con el servidor...');
-          const response = await fetch(`${API_URL}/api/health`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Servidor conectado:', data);
-          } else {
-            console.warn('⚠️ Servidor respondió con error:', response.status);
-          }
-        } catch (error) {
-          console.error('❌ No se pudo conectar al servidor:', error);
-          console.error('💡 El servidor puede estar apagándose (Render free tier)');
-          alert('El servidor está iniciándose. Esto puede tomar 1-2 minutos en Render. Por favor espera y recarga la página.');
-        }
       }
 
       function escapeHtml(s){
@@ -116,38 +95,33 @@
 
       async function loadPosts(){
         try {
-          console.log('📨 Cargando posts desde:', `${API_URL}/api/forum/posts`);
-          const response = await fetch(`${API_URL}/api/forum/posts`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
+          console.log('📨 Cargando posts desde Supabase...');
           
-          console.log('📨 Response status:', response.status);
-          console.log('📨 Response headers:', Object.fromEntries(response.headers.entries()));
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Error loading posts:', errorText);
-            
-            // Si es error de servidor, puede estar iniciándose
-            if (response.status >= 500) {
-              throw new Error('El servidor está iniciándose. Por favor espera 1-2 minutos y recarga.');
-            }
-            
-            throw new Error(`Error ${response.status}: ${errorText}`);
+          const { data, error } = await supabase
+            .from('posts')
+            .select(`
+              id,
+              message,
+              created_at,
+              users (
+                id,
+                username,
+                profile_image
+              )
+            `)
+            .order('created_at', { ascending: true });
+
+          if (error) {
+            console.error('❌ Error cargando posts:', error);
+            throw error;
           }
-          
-          const data = await response.json();
-          console.log('✅ Posts cargados:', data.posts?.length || 0);
-          console.log('📋 Posts:', data.posts);
-          return data.posts || [];
+
+          console.log('✅ Posts cargados:', data?.length || 0);
+          return data || [];
         } catch (error) {
           console.error('❌ Error loading posts:', error);
           elMessages.innerHTML = `<div style="text-align: center; padding: 20px; color: #f44336;">
-            Error al cargar mensajes: ${error.message}<br>
-            <small>Verifica la consola (F12) para más detalles</small>
+            Error al cargar mensajes: ${error.message}
           </div>`;
           return [];
         }
@@ -155,36 +129,25 @@
 
       async function loadUsers(){
         try {
-          console.log('👥 Cargando usuarios desde:', `${API_URL}/api/users`);
-          const response = await fetch(`${API_URL}/api/users`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
+          console.log('👥 Cargando usuarios desde Supabase...');
           
-          console.log('👥 Response status:', response.status);
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Error loading users:', errorText);
-            
-            if (response.status >= 500) {
-              throw new Error('El servidor está iniciándose. Por favor espera 1-2 minutos y recarga.');
-            }
-            
-            throw new Error(`Error ${response.status}: ${errorText}`);
+          const { data, error } = await supabase
+            .from('users')
+            .select('id, username, email, profile_image')
+            .order('username', { ascending: true });
+
+          if (error) {
+            console.error('❌ Error cargando usuarios:', error);
+            throw error;
           }
-          
-          const data = await response.json();
-          console.log('✅ Usuarios cargados:', data.users?.length || 0);
-          console.log('📋 Lista de usuarios:', data.users);
-          return data.users || [];
+
+          console.log('✅ Usuarios cargados:', data?.length || 0);
+          return data || [];
         } catch (error) {
           console.error('❌ Error loading users:', error);
           const usersList = document.getElementById('usersList');
           usersList.innerHTML = `<div style="text-align: center; padding: 10px; color: #f44336; font-size: 12px;">
-            Error: ${error.message}
+            Error al cargar usuarios
           </div>`;
           return [];
         }
@@ -209,7 +172,6 @@
           userEl.className = 'user';
           userEl.style.cursor = 'pointer';
           userEl.onclick = () => {
-            console.log('👤 Navegando al perfil de:', user.username, '(ID:', user.id, ')');
             window.location.href = `Perfil/perfil-publico.html?id=${user.id}`;
           };
 
@@ -273,89 +235,72 @@
           return;
         }
         
-        if (!token) {
-          console.error('❌ No hay token');
+        if (!user || !user.id) {
+          console.error('❌ No hay usuario');
           alert('No estás autenticado. Por favor, inicia sesión.');
           window.location.href = 'login-register.html';
           return;
         }
 
-        // Deshabilitar botón mientras se envía
         const submitBtn = elComposer.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
 
         try {
-          console.log('📤 Enviando POST a:', `${API_URL}/api/forum/posts`);
-          console.log('📤 Token:', token.substring(0, 20) + '...');
+          console.log('📤 Insertando post en Supabase...');
+          console.log('📤 User ID:', user.id);
           console.log('📤 Mensaje:', text);
 
-          const response = await fetch(`${API_URL}/api/forum/posts`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ message: text })
-          });
+          const { data, error } = await supabase
+            .from('posts')
+            .insert([
+              { 
+                user_id: user.id,
+                message: text
+              }
+            ])
+            .select();
 
-          console.log('📤 Response status:', response.status);
-          console.log('📤 Response headers:', Object.fromEntries(response.headers.entries()));
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Error response:', errorText);
-            
-            if (response.status === 401 || response.status === 403) {
-              alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = 'login-register.html';
-              return;
-            }
-            
-            if (response.status >= 500) {
-              throw new Error('Error del servidor. Por favor intenta nuevamente en unos momentos.');
-            }
-            
-            let errorMessage;
-            try {
-              const errorData = JSON.parse(errorText);
-              errorMessage = errorData.detail || errorText;
-            } catch {
-              errorMessage = errorText;
-            }
-            
-            throw new Error(`Error ${response.status}: ${errorMessage}`);
+          if (error) {
+            console.error('❌ Error insertando post:', error);
+            throw error;
           }
 
-          const result = await response.json();
-          console.log('✅ Mensaje enviado:', result);
+          console.log('✅ Mensaje enviado:', data);
           
           elMessage.value = '';
           await loadAndRender();
           
         } catch (error) {
           console.error('❌ Error posting:', error);
-          alert('Error al enviar mensaje: ' + error.message + '\n\nRevisa la consola (F12) para más detalles.');
+          alert('Error al enviar mensaje: ' + error.message);
         } finally {
-          // Rehabilitar botón
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
         }
       });
 
-      // Probar conexión primero
-      testConnection();
-
       // Cargar datos iniciales
       loadAndRender();
 
-      // Auto-refresh cada 10 segundos (para no saturar el servidor de Render)
-      setInterval(loadAndRender, 10000);
-      console.log('⏱️ Auto-refresh activado (cada 10 segundos)');
+      // Auto-refresh cada 5 segundos
+      setInterval(loadAndRender, 5000);
+      console.log('⏱️ Auto-refresh activado (cada 5 segundos)');
+
+      // Suscribirse a cambios en tiempo real
+      const postsSubscription = supabase
+        .channel('posts_channel')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'posts' }, 
+          (payload) => {
+            console.log('🔔 Cambio detectado en posts:', payload);
+            loadAndRender();
+          }
+        )
+        .subscribe();
+
+      console.log('🔔 Suscripción a tiempo real activada');
     })();
   </script>
 </body>
